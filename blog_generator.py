@@ -45,6 +45,7 @@ class Agent:
             print(f"Error calling LLM API: {e}")
             return None
 
+
 class ResearchAgent(Agent):
     """Agent responsible for researching trending HR topics and gathering information"""
     def __init__(self):
@@ -84,6 +85,10 @@ class ResearchAgent(Agent):
         
         response = self.call_llm(prompt, 
                                system_message="You are a research specialist in HR trends. Provide accurate, current information on trending HR topics.")
+        
+        if response is None:
+            print("Error: No response from LLM API")
+            return ["Remote Work Policies", "Employee Wellness Programs", "AI in HR", "DEI Initiatives", "Employee Retention Strategies"]
         
         try:
             # Extract JSON from response if needed
@@ -127,7 +132,13 @@ class ResearchAgent(Agent):
                                system_message="You are a research specialist in HR. Provide comprehensive, accurate information.",
                                max_tokens=3000)
         
+        if response is None:
+            print("Error: No response from LLM API")
+            return "No information available"
+        
         return response
+
+
 
 class ContentPlanningAgent(Agent):
     """Agent responsible for creating a structured outline based on research"""
