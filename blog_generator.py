@@ -228,6 +228,7 @@ class ContentPlanningAgent(Agent):
                 "longtail": [f"how to implement {topic}", f"benefits of {topic} for businesses", f"{topic} case studies"]
             }
 # ...existing code...
+# ...existing code...
 
 class ContentGenerationAgent(Agent):
     """Agent responsible for writing the blog post based on outline and research"""
@@ -375,6 +376,8 @@ class ContentGenerationAgent(Agent):
             return ""
         
         return section_content
+
+# ...existing code...
 
 # ...existing code...
 
