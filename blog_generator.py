@@ -2,9 +2,7 @@ import os
 import json
 import time
 import requests
-from dotenv import load_dotenv
-import os
-from google import generativeai
+import openai
 from datetime import datetime
 from dotenv import load_dotenv
 import argparse
@@ -15,11 +13,8 @@ import markdown
 # Load environment variables from .env file
 load_dotenv()
 
-# Access the Gemini API key
-gemini_api_key = os.getenv("GEMINI_API_KEY")
-
-if not gemini_api_key:
-    raise ValueError("API key for Gemini is not set.")
+# Configure OpenAI API
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class Agent:
     """Base class for all agents in the system"""
@@ -36,7 +31,7 @@ class Agent:
             system_message = f"You are a helpful {self.name}."
         
         try:
-            response = gemini_api_key.chat.completions.create(
+            response = openai.chat.completions.create(
                 model="gpt-4",  # You can change this to your preferred model
                 messages=[
                     {"role": "system", "content": system_message},
@@ -49,7 +44,6 @@ class Agent:
         except Exception as e:
             print(f"Error calling LLM API: {e}")
             return None
-
 
 class ResearchAgent(Agent):
     """Agent responsible for researching trending HR topics and gathering information"""
@@ -90,10 +84,6 @@ class ResearchAgent(Agent):
         
         response = self.call_llm(prompt, 
                                system_message="You are a research specialist in HR trends. Provide accurate, current information on trending HR topics.")
-        
-        if response is None:
-            print("Error: No response from LLM API")
-            return ["Remote Work Policies", "Employee Wellness Programs", "AI in HR", "DEI Initiatives", "Employee Retention Strategies"]
         
         try:
             # Extract JSON from response if needed
@@ -137,13 +127,7 @@ class ResearchAgent(Agent):
                                system_message="You are a research specialist in HR. Provide comprehensive, accurate information.",
                                max_tokens=3000)
         
-        if response is None:
-            print("Error: No response from LLM API")
-            return "No information available"
-        
         return response
-
-
 
 class ContentPlanningAgent(Agent):
     """Agent responsible for creating a structured outline based on research"""
@@ -232,8 +216,6 @@ class ContentPlanningAgent(Agent):
                 "secondary": [f"{topic} best practices", f"{topic} strategies", f"{topic} trends", f"{topic} examples", f"{topic} benefits"],
                 "longtail": [f"how to implement {topic}", f"benefits of {topic} for businesses", f"{topic} case studies"]
             }
-# ...existing code...
-# ...existing code...
 
 class ContentGenerationAgent(Agent):
     """Agent responsible for writing the blog post based on outline and research"""
@@ -261,8 +243,7 @@ class ContentGenerationAgent(Agent):
                 keywords, 
                 research
             )
-            if section_content:
-                full_content += section_content + "\n\n"
+            full_content += section_content + "\n\n"
         
         return {
             "topic": topic,
@@ -272,10 +253,6 @@ class ContentGenerationAgent(Agent):
     
     def _extract_sections(self, outline):
         """Extract sections from the outline"""
-        if outline is None:
-            print("Error: Outline is None")
-            return []
-        
         # Simple implementation - in a real system you would parse the markdown properly
         sections = []
         current_section = {"heading": "", "description": "", "subsections": []}
@@ -311,7 +288,7 @@ class ContentGenerationAgent(Agent):
                     current_section["description"] += line + " "
         
         # Add the last section
-        if current_section["heading"] and current_section not in sections:
+        if current_section["heading"]:
             sections.append(current_section)
             
         return sections
@@ -376,15 +353,7 @@ class ContentGenerationAgent(Agent):
         # Generate content for the section
         section_content = self.call_llm(prompt, system_message=system_message, max_tokens=1500)
         
-        if section_content is None:
-            print("Error: No response from LLM API for section content generation")
-            return ""
-        
         return section_content
-
-# ...existing code...
-
-# ...existing code...
 
 class SEOOptimizationAgent(Agent):
     """Agent responsible for optimizing content for SEO"""
@@ -665,10 +634,10 @@ def main():
     
     args = parser.parse_args()
     
-    # Check for GEMINI AI API key
-    if not os.getenv("GEMINI_API_KEY"):
-        print("Error: GEMINI_API_KEY environment variable is not set.")
-        print("Please set your GEMINIAI API key in a .env file or environment variable.")
+    # Check for OpenAI API key
+    if not os.getenv("OPENAI_API_KEY"):
+        print("Error: OPENAI_API_KEY environment variable is not set.")
+        print("Please set your OpenAI API key in a .env file or environment variable.")
         return
     
     # Create and run the blog generator system
