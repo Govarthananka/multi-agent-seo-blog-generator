@@ -2,7 +2,9 @@ import os
 import json
 import time
 import requests
-import openai
+from dotenv import load_dotenv
+import os
+from google import generativeai
 from datetime import datetime
 from dotenv import load_dotenv
 import argparse
@@ -34,7 +36,7 @@ class Agent:
             system_message = f"You are a helpful {self.name}."
         
         try:
-            response = openai.chat.completions.create(
+            response = gemini_api_key.chat.completions.create(
                 model="gpt-4",  # You can change this to your preferred model
                 messages=[
                     {"role": "system", "content": system_message},
@@ -663,10 +665,10 @@ def main():
     
     args = parser.parse_args()
     
-    # Check for OpenAI API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY environment variable is not set.")
-        print("Please set your OpenAI API key in a .env file or environment variable.")
+    # Check for GEMINI AI API key
+    if not os.getenv("GEMINI_API_KEY"):
+        print("Error: GEMINI_API_KEY environment variable is not set.")
+        print("Please set your GEMINIAI API key in a .env file or environment variable.")
         return
     
     # Create and run the blog generator system
