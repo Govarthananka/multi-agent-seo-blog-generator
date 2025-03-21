@@ -255,7 +255,8 @@ class ContentGenerationAgent(Agent):
                 keywords, 
                 research
             )
-            full_content += section_content + "\n\n"
+            if section_content:
+                full_content += section_content + "\n\n"
         
         return {
             "topic": topic,
@@ -368,6 +369,10 @@ class ContentGenerationAgent(Agent):
         
         # Generate content for the section
         section_content = self.call_llm(prompt, system_message=system_message, max_tokens=1500)
+        
+        if section_content is None:
+            print("Error: No response from LLM API for section content generation")
+            return ""
         
         return section_content
 
