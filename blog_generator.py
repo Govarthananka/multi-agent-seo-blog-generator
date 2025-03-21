@@ -29,21 +29,44 @@ class Agent:
         """Call the LLM API with the given prompt"""
         if system_message is None:
             system_message = f"You are a helpful {self.name}."
+    
+    # Try the API call up to 3 times with exponential backoff
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = openai.chat.completions.create(
+                    model="gpt-3.5-turbo",  # You can change this to your preferred model
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4 seconds
+                print(f"Attempt {attempt+1}/{max_retries} failed. Error calling LLM API: {e}")
+                print(f"Waiting {wait_time} seconds before retrying...")
+                if attempt < max_retries - 1:
+                    time.sleep(wait_time)
+                continue
         
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-4",  # You can change this to your preferred model
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            print(f"Error calling LLM API: {e}")
-            return None
+        # If all retries fail, return a fallback response instead of None
+        print("All API call attempts failed. Using fallback response.")
+        
+        # Construct a basic fallback response based on the prompt
+        topic_match = re.search(r"topic[:\s]+([^\.]+)", prompt, re.IGNORECASE)
+        topic = topic_match.group(1).strip() if topic_match else "the requested topic"
+        
+        if "keyword" in prompt.lower():
+            return f"seo, best practices, guide, tips, {topic}, how to"
+        elif "outline" in prompt.lower():
+            return f"# {topic.title()} Guide\n\n## Introduction\n## Key Benefits\n## Best Practices\n## Common Challenges\n## Tools and Resources\n## Conclusion"
+        elif "research" in prompt.lower():
+            return f"Basic information about {topic}. This is fallback content due to API issues."
+        else:
+            return f"Information about {topic}. This is fallback content due to API issues."
 
 class ResearchAgent(Agent):
     """Agent responsible for researching trending HR topics and gathering information"""
