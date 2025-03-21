@@ -13,8 +13,11 @@ import markdown
 # Load environment variables from .env file
 load_dotenv()
 
-# Configure OpenAI API
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Access the Gemini API key
+gemini_api_key = os.getenv("GEMINI_API_KEY")
+
+if not gemini_api_key:
+    raise ValueError("API key for Gemini is not set.")
 
 class Agent:
     """Base class for all agents in the system"""
