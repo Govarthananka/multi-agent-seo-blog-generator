@@ -227,6 +227,7 @@ class ContentPlanningAgent(Agent):
                 "secondary": [f"{topic} best practices", f"{topic} strategies", f"{topic} trends", f"{topic} examples", f"{topic} benefits"],
                 "longtail": [f"how to implement {topic}", f"benefits of {topic} for businesses", f"{topic} case studies"]
             }
+# ...existing code...
 
 class ContentGenerationAgent(Agent):
     """Agent responsible for writing the blog post based on outline and research"""
@@ -264,6 +265,10 @@ class ContentGenerationAgent(Agent):
     
     def _extract_sections(self, outline):
         """Extract sections from the outline"""
+        if outline is None:
+            print("Error: Outline is None")
+            return []
+        
         # Simple implementation - in a real system you would parse the markdown properly
         sections = []
         current_section = {"heading": "", "description": "", "subsections": []}
@@ -299,7 +304,7 @@ class ContentGenerationAgent(Agent):
                     current_section["description"] += line + " "
         
         # Add the last section
-        if current_section["heading"]:
+        if current_section["heading"] and current_section not in sections:
             sections.append(current_section)
             
         return sections
@@ -365,6 +370,8 @@ class ContentGenerationAgent(Agent):
         section_content = self.call_llm(prompt, system_message=system_message, max_tokens=1500)
         
         return section_content
+
+# ...existing code...
 
 class SEOOptimizationAgent(Agent):
     """Agent responsible for optimizing content for SEO"""
